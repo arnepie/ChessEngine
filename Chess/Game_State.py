@@ -14,3 +14,5 @@ class GameState:
             ["---", "---", "---", "---", "---", "---", "---", "---"],
             ["wp1", "wp2", "wp3", "wp4", "wp5", "wp6", "wp7", "wp8"],
             ["wR1", "wN1", "wB1", "wQ", "wK", "wB2", "wN2", "wR2"]]
+        self.moves = []
+        self.white_to_move = True
