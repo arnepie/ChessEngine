@@ -8,6 +8,7 @@ Not done
 - Board + pieces drawing
 - Moving pieces
 - Color to move
+- Undo move
 
 # To do
 - Legal moves detection
