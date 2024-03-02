@@ -2,15 +2,16 @@ import pygame.image
 import Game_State
 import pygame
 import copy
+import time
 
 game_state = Game_State.GameState()
 
 
-def draw_board(piece_selected):
+def draw_board():
     pygame.init()
 
     size = (1600, 1200)  # Width, Height
-    rows, columns = 8, 8  # Changeable board size
+    rows, columns = 8, 8  # Board size
 
     first_color = gray = 128, 128, 128  # RGB color code
     second_color = white = 255, 255, 255  # RGB color code
@@ -31,6 +32,14 @@ def draw_board(piece_selected):
             pos_x += 80
             pygame.draw.rect(screen, second_color, pygame.Rect(pos_x, pos_y, 80, 80))
 
+    pygame.display.flip()  # Updating screen
+
+    return screen  # Returning screen for future use
+
+
+def highlight_square(piece_selected, screen):
+    red = (255, 0, 0)
+
     row_number = 0  # Starting row number
     for row in game_state.board:
         row_number += 1
@@ -41,8 +50,6 @@ def draw_board(piece_selected):
                 pygame.draw.rect(screen, red, pygame.Rect(400 + (80 * square_number), 100 + (80 * row_number), 80, 80))  # Making square of piece selected red
 
     pygame.display.flip()  # Updating screen
-
-    return screen  # Returning screen for future use
 
 
 def draw_pieces(screen, board):
@@ -60,13 +67,12 @@ def draw_pieces(screen, board):
 
     pygame.display.flip()  # Updating screen
 
-    print("drawn")
-
 
 def main():
     running = True
 
-    screen = draw_board(False)  # Drawing board
+    screen = draw_board()  # Drawing board
+    time.sleep(0.01)  # Sleeping time to prevent bugs
     draw_pieces(screen, game_state.board)  # Drawing pieces
     player_clicks = []  # Making empty list for player clicks
     holding_a_piece = False  # Setting holding_a_piece to false
@@ -100,7 +106,9 @@ def main():
                     if not holding_a_piece:
                         player_clicks = []  # If player is not holding a piece, the clicks get reset
                     else:
-                        screen = draw_board(piece_holding)  # Drawing screen
+                        screen = draw_board()  # Drawing board
+                        highlight_square(piece_holding, screen)  # Drawing highlight square
+                        time.sleep(0.01)  # Sleeping time to prevent bugs
                         draw_pieces(screen, game_state.board)  # Drawing pieces
 
                 if len(player_clicks) == 2:
@@ -119,6 +127,12 @@ def main():
                                 row_set_index = row_number  # Defining row index of square selected
                                 square_set_index = square_number  # Defining square index of square selected
 
+                                row = game_state.board[row_set_index]  # Defining row
+                                if row[square_set_index] == piece_holding:  # If player clicked the same square
+                                    holding_a_piece = False
+                                    player_clicks = []
+                                    piece_holding = None
+
                                 if holding_a_piece:
                                     for find_row in game_state.board:
                                         for find_square in find_row:
@@ -131,18 +145,24 @@ def main():
                                                     game_state.moves.append(copy.deepcopy(game_state.board))  # Making deepcopy of board and adding it to the moves list
                                                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
 
+                                                    print(game_state.board)
+                                                    print(game_state.moves)
                                                 elif game_state.board != game_state.moves[-1]:
                                                     game_state.moves.append(copy.deepcopy(game_state.board))  # Making deepcopy of board and adding it to the moves list
                                                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
+                                                print(game_state.moves)
 
                     player_clicks = []  # resetting player clicks
                     holding_a_piece = False
-                    screen = draw_board(None)  # Drawing screen
+                    screen = draw_board()  # Drawing board
+                    highlight_square(piece_holding, screen)  # Drawing highlight square
+                    time.sleep(0.01)  # Sleeping time to prevent bugs
                     draw_pieces(screen, game_state.board)  # Drawing pieces
+                    
             if event.type == pygame.KEYDOWN:  # Key down event
                 if event.key == pygame.K_BACKSPACE:  # Backspace event
                     if len(game_state.moves) > 1:
-                        game_state.board = game_state.moves[-2]  # Board is set to second last move
+                        game_state.board = copy.deepcopy(game_state.moves[-2])  # Board is set to second last move
                         game_state.moves.pop(-1)  # Last move is removed from moves list
                     else:  # If only 1 move is played, board is reset and moves list is also reset
                         game_state.board = [
@@ -156,9 +176,12 @@ def main():
                                             ["wR1", "wN1", "wB1", "wQ", "wK", "wB2", "wN2", "wR2"]]
                         game_state.moves = []
 
-                    screen = draw_board(None)  # Drawing screen
+                    screen = draw_board()  # Drawing board
+                    time.sleep(0.01)  # Sleeping time to prevent bugs
                     draw_pieces(screen, game_state.board)  # Drawing pieces
                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
+                    print(game_state.moves)
+                    print(game_state.board)
 
             if event.type == pygame.QUIT:  # Quit event
                 running = False
