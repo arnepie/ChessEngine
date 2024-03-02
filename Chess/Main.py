@@ -40,14 +40,11 @@ def draw_board():
 def highlight_square(piece_selected, screen):
     red = (255, 0, 0)
 
-    row_number = 0  # Starting row number
-    for row in game_state.board:
-        row_number += 1
-        square_number = 0  # Starting square number
-        for square in row:
-            square_number += 1
+    for row_number, row in enumerate(game_state.board):
+        for square_number, square in enumerate(row):
             if square == piece_selected:
-                pygame.draw.rect(screen, red, pygame.Rect(400 + (80 * square_number), 100 + (80 * row_number), 80, 80))  # Making square of piece selected red
+                pygame.draw.rect(screen, red,
+                                 pygame.Rect(400 + (80 * (square_number + 1)), 100 + (80 * (row_number + 1)), 80, 80))
 
     pygame.display.flip()  # Updating screen
 
@@ -95,6 +92,12 @@ def main():
                                 if piece_pos_x - 40 < mouse_pos_x < piece_pos_x + 40 and piece_pos_y - 40 < mouse_pos_y < piece_pos_y + 40:  # Checking if mouse pos is on square of piece
                                     piece_holding = square  # Setting piece_holding to the piece that was selected
                                     holding_a_piece = True  # Setting holding_a_piece to true
+                                    valid_moves = game_state.check_valid_moves(piece_holding)
+                                    for valid_move in valid_moves:
+                                        print("")
+                                        for row1 in valid_move:
+                                            print(row1)
+
                             if not game_state.white_to_move and square[:1] == "b":
                                 piece_pos_y = 215 + (80 * game_state.board.index(row))  # Getting Y pos of piece
                                 piece_pos_x = 515 + (80 * row.index(square))  # Getting X pos of piece
@@ -102,6 +105,11 @@ def main():
                                 if piece_pos_x - 40 < mouse_pos_x < piece_pos_x + 40 and piece_pos_y - 40 < mouse_pos_y < piece_pos_y + 40:  # Checking if mouse pos is on square of piece
                                     piece_holding = square  # Setting piece_holding to the piece that was selected
                                     holding_a_piece = True  # Setting holding_a_piece to true
+                                    valid_moves = game_state.check_valid_moves(piece_holding)
+                                    for valid_move in valid_moves:
+                                        print("")
+                                        for row1 in valid_move:
+                                            print(row1)
 
                     if not holding_a_piece:
                         player_clicks = []  # If player is not holding a piece, the clicks get reset
@@ -114,12 +122,8 @@ def main():
                 if len(player_clicks) == 2:
                     mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()  # Getting mouse pos
 
-                    row_number = -1  # Starting row number
-                    for row1 in game_state.board:
-                        row_number += 1
-                        square_number = -1  # Starting square number
-                        for _ in row1:
-                            square_number += 1
+                    for row_number, row in enumerate(game_state.board):
+                        for square_number, square in enumerate(row):
                             square_pos_y = 215 + (80 * row_number)
                             square_pos_x = 515 + (80 * square_number)
 
@@ -145,20 +149,17 @@ def main():
                                                     game_state.moves.append(copy.deepcopy(game_state.board))  # Making deepcopy of board and adding it to the moves list
                                                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
 
-                                                    print(game_state.board)
-                                                    print(game_state.moves)
                                                 elif game_state.board != game_state.moves[-1]:
                                                     game_state.moves.append(copy.deepcopy(game_state.board))  # Making deepcopy of board and adding it to the moves list
                                                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
-                                                print(game_state.moves)
 
                     player_clicks = []  # resetting player clicks
                     holding_a_piece = False
                     screen = draw_board()  # Drawing board
-                    highlight_square(piece_holding, screen)  # Drawing highlight square
+                    highlight_square(None, screen)  # Drawing highlight square
                     time.sleep(0.01)  # Sleeping time to prevent bugs
                     draw_pieces(screen, game_state.board)  # Drawing pieces
-                    
+
             if event.type == pygame.KEYDOWN:  # Key down event
                 if event.key == pygame.K_BACKSPACE:  # Backspace event
                     if len(game_state.moves) > 1:
@@ -180,8 +181,6 @@ def main():
                     time.sleep(0.01)  # Sleeping time to prevent bugs
                     draw_pieces(screen, game_state.board)  # Drawing pieces
                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
-                    print(game_state.moves)
-                    print(game_state.board)
 
             if event.type == pygame.QUIT:  # Quit event
                 running = False
