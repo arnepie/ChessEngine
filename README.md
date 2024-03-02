@@ -11,8 +11,10 @@ Not done
 - Undo move
 
 # To do
-- Legal moves detection
+- Legal moves detection (partially finished)
 - Check + checkmate detection
 - Castling
+- Promotion
+- En pasant
 - (chess computer)
 
