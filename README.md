@@ -9,10 +9,12 @@ Not done
 - Moving pieces
 - Color to move
 - Undo move
+- Check detection
+- Legal move detection (all pieces but pawns)
 
 # To do
-- Legal moves detection (partially finished)
-- Check + checkmate detection
+- Legal moves detection for pawns
+- Checkmate detection
 - Castling
 - Promotion
 - En pasant
