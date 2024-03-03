@@ -8,14 +8,11 @@ game_state = Game_State.GameState()
 
 
 def draw_board():
-    pygame.init()
-
     size = (1600, 1200)  # Width, Height
     rows, columns = 8, 8  # Board size
 
     first_color = gray = 128, 128, 128  # RGB color code
     second_color = white = 255, 255, 255  # RGB color code
-    red = (255, 0, 0)
 
     screen = pygame.display.set_mode(size)  # Make screen
     pygame.display.set_caption("Chess")  # Set caption of screen
@@ -37,24 +34,29 @@ def draw_board():
     return screen  # Returning screen for future use
 
 
-def highlight_square(piece_selected, screen):
+def highlight_selected_piece(selected_piece, screen):
     red = (255, 0, 0)
 
     for row_number, row in enumerate(game_state.board):
         for square_number, square in enumerate(row):
-            if square == piece_selected:
-                pygame.draw.rect(screen, red,
-                                 pygame.Rect(400 + (80 * (square_number + 1)), 100 + (80 * (row_number + 1)), 80, 80))
+            if square == selected_piece:
+                pygame.draw.rect(screen, red, pygame.Rect(400 + (80 * (square_number + 1)), 100 + (80 * (row_number + 1)), 80, 80))
 
     pygame.display.flip()  # Updating screen
 
 
-def draw_pieces(screen, board):
-    pieces = ["bR", "bN", "bB", "bQ", "bK", "bp", "wR", "wN", "wB", "wQ", "wK", "wp"]  # List of all pieces
+def load_images():
     images = []  # Empty list for images
+    pieces = ["bR", "bN", "bB", "bQ", "bK", "bp", "wR", "wN", "wB", "wQ", "wK", "wp"]  # List of all pieces
 
     for piece in pieces:
         images.append(pygame.image.load("images/" + piece + ".png"))  # Adding images to list
+
+    return images
+
+
+def draw_pieces(screen, board, images):
+    pieces = ["bR", "bN", "bB", "bQ", "bK", "bp", "wR", "wN", "wB", "wQ", "wK", "wp"]  # List of all pieces
 
     for row in board:
         for square in row:
@@ -66,11 +68,14 @@ def draw_pieces(screen, board):
 
 
 def main():
+    pygame.init()
     running = True
 
     screen = draw_board()  # Drawing board
+    images = load_images()
     time.sleep(0.01)  # Sleeping time to prevent bugs
-    draw_pieces(screen, game_state.board)  # Drawing pieces
+    draw_pieces(screen, game_state.board, images)  # Drawing pieces
+
     player_clicks = []  # Making empty list for player clicks
     holding_a_piece = False  # Setting holding_a_piece to false
     piece_holding = None  # Setting piece_holding to None
@@ -83,7 +88,11 @@ def main():
                 if len(player_clicks) == 1:
                     holding_a_piece = False
 
+                    found = False
                     for row in game_state.board:
+                        if found:
+                            break
+
                         for square in row:
                             if game_state.white_to_move and square[:1] == "w":
                                 piece_pos_y = 215 + (80 * game_state.board.index(row))  # Getting Y pos of piece
@@ -97,6 +106,8 @@ def main():
                                         print("")
                                         for row1 in valid_move:
                                             print(row1)
+                                    found = True
+                                    break
 
                             if not game_state.white_to_move and square[:1] == "b":
                                 piece_pos_y = 215 + (80 * game_state.board.index(row))  # Getting Y pos of piece
@@ -110,14 +121,16 @@ def main():
                                         print("")
                                         for row1 in valid_move:
                                             print(row1)
+                                    found = True
+                                    break
 
                     if not holding_a_piece:
                         player_clicks = []  # If player is not holding a piece, the clicks get reset
                     else:
                         screen = draw_board()  # Drawing board
-                        highlight_square(piece_holding, screen)  # Drawing highlight square
+                        highlight_selected_piece(piece_holding, screen)  # Drawing highlight square
                         time.sleep(0.01)  # Sleeping time to prevent bugs
-                        draw_pieces(screen, game_state.board)  # Drawing pieces
+                        draw_pieces(screen, game_state.board, images)  # Drawing pieces
 
                 if len(player_clicks) == 2:
                     mouse_pos_x, mouse_pos_y = pygame.mouse.get_pos()  # Getting mouse pos
@@ -156,16 +169,16 @@ def main():
                     player_clicks = []  # resetting player clicks
                     holding_a_piece = False
                     screen = draw_board()  # Drawing board
-                    highlight_square(None, screen)  # Drawing highlight square
+                    highlight_selected_piece(None, screen)  # Drawing highlight square
                     time.sleep(0.01)  # Sleeping time to prevent bugs
-                    draw_pieces(screen, game_state.board)  # Drawing pieces
+                    draw_pieces(screen, game_state.board, images)  # Drawing pieces
 
             if event.type == pygame.KEYDOWN:  # Key down event
                 if event.key == pygame.K_BACKSPACE:  # Backspace event
                     if len(game_state.moves) > 1:
                         game_state.board = copy.deepcopy(game_state.moves[-2])  # Board is set to second last move
                         game_state.moves.pop(-1)  # Last move is removed from moves list
-                    else:  # If only 1 move is played, board is reset and moves list is also reset
+                    else:  # If only 1 move is played, the board and the moves list is reset
                         game_state.board = [
                                             ["bR1", "bN1", "bB1", "bQ", "bK", "bB2", "bN2", "bR2"],
                                             ["bp1", "bp2", "bp3", "bp4", "bp5", "bp6", "bp7", "bp8"],
@@ -179,7 +192,7 @@ def main():
 
                     screen = draw_board()  # Drawing board
                     time.sleep(0.01)  # Sleeping time to prevent bugs
-                    draw_pieces(screen, game_state.board)  # Drawing pieces
+                    draw_pieces(screen, game_state.board, images)  # Drawing pieces
                     game_state.white_to_move = not game_state.white_to_move  # Switching color to move each turn
 
             if event.type == pygame.QUIT:  # Quit event
